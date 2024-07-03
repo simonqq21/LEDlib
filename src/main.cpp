@@ -22,6 +22,9 @@ void loop() {
     else if (cmd == "e") {
       led1.blink(1000, 0.5);
     }
+    else if (cmd == "i") {
+      led1.blink(500, 0.1);
+    }
     else if (cmd == "r") {
       led1.aSet(50);
     }
