@@ -1,18 +1,41 @@
 #include <Arduino.h>
+#include "LED.h"
 
-// put function declarations here:
-int myFunction(int, int);
+LED led1(5);
+String cmd;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115200);
+  led1.begin();
+  // analogWrite(5, 100);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  led1.startLoop();
+  if (Serial.available()) {
+    cmd = Serial.readStringUntil('\n');
+    Serial.printf("cmd=%s", cmd);
+    if (cmd == "q") {
+      Serial.println("led1 on");
+      led1.on();
+    }
+    else if (cmd == "e") {
+      led1.blink(1000, 0.5);
+    }
+    else if (cmd == "r") {
+      led1.aSet(50);
+    }
+    else if (cmd == "t") {
+      led1.aSet(200);
+    }
+    else if (cmd == "y") {
+      led1.toggle();
+    }
+    else if (cmd == "u") {
+      led1.set(1);
+    }
+    else {
+      led1.off();
+    }
+  }
 }

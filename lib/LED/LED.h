@@ -21,12 +21,12 @@ class LED {
     private:
         int _pin;
         int _ledMode;
-        int _curLEDState, _nextLEDState;
+        bool _curLEDDigitalVal, _nextLEDDigitalVal;
+        int _curLEDAnalogVal;
+        bool _ledASet;
         unsigned long _previousMillis;
-        unsigned int _blinkingPeriod;
         unsigned int _blinkOnPeriod;
-        unsigned int_blinkOffPeriod;
-        int _analogValue;
+        unsigned int _blinkOffPeriod;
 };
 
 #endif

@@ -10,22 +10,48 @@ void LED::begin() {
 }
 
 void LED::startLoop() {
-    // switch (_ledMode)
-    // {
-    // case /* constant-expression */:
-    //     /* code */
-    //     break;
-    
-    // default:
-    //     break;
-    // }
+    switch (_ledMode)
+    {
+    case LED_ON:
+        _nextLEDDigitalVal = true;
+        break;
+    case LED_BLINK:
+        if (millis() - _previousMillis > _blinkOnPeriod && _curLEDDigitalVal == true) {
+            _previousMillis = millis();
+            _nextLEDDigitalVal = false;
+
+        }
+        else if (millis() - _previousMillis > _blinkOffPeriod && _curLEDDigitalVal == false) {
+            _previousMillis = millis();
+            _nextLEDDigitalVal = true;
+        }
+        break;
+    case LED_ANALOGSET:
+        if (!_ledASet) {
+            analogWrite(_pin, _curLEDAnalogVal);
+            _ledASet = true;
+        }
+        break;
+    default:
+        _nextLEDDigitalVal = false;
+    }
+
+    // write values to the LED pin only upon change to avoid flickering
+    if (_ledMode != LED_ANALOGSET) {
+        if (_curLEDDigitalVal != _nextLEDDigitalVal) {
+            _curLEDDigitalVal = _nextLEDDigitalVal;
+            digitalWrite(_pin, _curLEDDigitalVal);
+        }
+    }
 }
 
 void LED::on() {
+    pinMode(_pin, OUTPUT);
     _ledMode = LED_ON;
 }
 
 void LED::off() {
+    pinMode(_pin, OUTPUT);
     _ledMode = LED_OFF;
 }
 
@@ -50,9 +76,20 @@ void LED::set(bool state) {
 }
 
 void LED::blink(unsigned int period, double dutyCycle) {
-    
+    pinMode(_pin, OUTPUT);
+    _ledMode = LED_BLINK;
+    if (dutyCycle > 1.0) {
+        dutyCycle = 1.0;
+    }
+    else if (dutyCycle < 0.0) {
+        dutyCycle = 0.0;
+    }
+    _blinkOnPeriod = period * dutyCycle;
+    _blinkOffPeriod = period * (1.0-dutyCycle);
 }
 
 void LED::aSet(int aValue) {
-
+    _ledMode = LED_ANALOGSET;
+    _curLEDAnalogVal = aValue;
+    _ledASet = false;
 }
