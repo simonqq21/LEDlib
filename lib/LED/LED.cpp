@@ -9,7 +9,19 @@ void LED::begin() {
     pinMode(_pin, OUTPUT);
 }
 
-void LED::startLoop() {
+void LED::loop() {
+    if (_timerOn && _onDuration > 0 && _ledMode > LED_OFF) {
+        _onDuration -= (millis() - _lastTimeTimerSet);
+        if (_lastTimeTimerSet != millis()) {
+            _lastTimeTimerSet = millis();
+        }
+    }
+    
+    if (_timerOn && _onDuration <= 0 && _ledMode > LED_OFF) {
+        _ledMode = LED_OFF;
+        _timerOn = false;
+    }
+
     switch (_ledMode)
     {
     case LED_ON:
@@ -92,4 +104,15 @@ void LED::aSet(int aValue) {
     _ledMode = LED_ANALOGSET;
     _curLEDAnalogVal = aValue;
     _ledASet = false;
+}
+
+void LED::setOnDuration(int milliseconds) {
+    if (milliseconds > 0) {
+        _timerOn = true;
+        _onDuration = milliseconds;
+        _lastTimeTimerSet = millis();
+    }
+    else {
+        _timerOn = false;
+    }
 }

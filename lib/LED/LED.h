@@ -11,13 +11,14 @@ class LED {
     public:
         LED(int pin);
         void begin(); 
-        void startLoop();
+        void loop();
         void on();
         void off();
         void toggle();
         void set(bool state);
         void blink(unsigned int period, double dutyCycle);
         void aSet(int aValue);
+        void setOnDuration(int seconds);
     private:
         int _pin;
         int _ledMode;
@@ -27,6 +28,9 @@ class LED {
         unsigned long _previousMillis;
         unsigned int _blinkOnPeriod;
         unsigned int _blinkOffPeriod;
+        bool _timerOn;
+        unsigned long _lastTimeTimerSet;
+        unsigned long _onDuration;
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "LED.h"
 
-LED led1(5);
+LED led1(18);
 String cmd;
 
 void setup() {
@@ -11,7 +11,7 @@ void setup() {
 }
 
 void loop() {
-  led1.startLoop();
+  led1.loop();
   if (Serial.available()) {
     cmd = Serial.readStringUntil('\n');
     Serial.printf("cmd=%s", cmd);
@@ -23,7 +23,9 @@ void loop() {
       led1.blink(1000, 0.5);
     }
     else if (cmd == "i") {
-      led1.blink(500, 0.1);
+      // test the on timer
+      led1.blink(400, 0.5);
+      led1.setOnDuration(2000);
     }
     else if (cmd == "r") {
       led1.aSet(50);
