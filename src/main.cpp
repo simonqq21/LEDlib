@@ -20,12 +20,13 @@ void loop() {
       led1.on();
     }
     else if (cmd == "e") {
+      led1.startTimer(1000, false);
       led1.blink(1000, 0.5);
     }
     else if (cmd == "i") {
       // test the on timer
-      led1.blink(400, 0.5);
-      led1.setOnDuration(2000);
+      led1.startTimer(1000, true);
+      led1.blink(100, 0.5);
     }
     else if (cmd == "r") {
       led1.aSet(50);

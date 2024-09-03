@@ -10,16 +10,14 @@ void LED::begin() {
 }
 
 void LED::loop() {
-    if (_timerOn && _onDuration > 0 && _ledMode > LED_OFF) {
-        _onDuration -= (millis() - _lastTimeTimerSet);
-        if (_lastTimeTimerSet != millis()) {
-            _lastTimeTimerSet = millis();
-        }
-    }
-    
-    if (_timerOn && _onDuration <= 0 && _ledMode > LED_OFF) {
+    if (_timerOn && millis() - _lastTimeTimerSet >= _onDuration && 
+        _ledMode > LED_OFF) {
         _ledMode = LED_OFF;
         _timerOn = false;
+        _ledASet = false;
+        if (_resumePrevLEDMode) {
+            _ledMode = _previousLEDMode;
+        }
     }
 
     switch (_ledMode)
@@ -106,7 +104,10 @@ void LED::aSet(int aValue) {
     _ledASet = false;
 }
 
-void LED::setOnDuration(int milliseconds) {
+void LED::startTimer(int milliseconds, bool resumePreviousMode) {
+    _previousLEDMode = _ledMode;
+    _resumePrevLEDMode = resumePreviousMode;
+
     if (milliseconds > 0) {
         _timerOn = true;
         _onDuration = milliseconds;
