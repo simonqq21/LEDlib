@@ -10,11 +10,11 @@ void LED::begin() {
 }
 
 void LED::loop() {
-    if (_timerOn && millis() - _lastTimeTimerSet >= _onDuration && 
-        _ledMode > LED_OFF) {
+    if (_timerOn && millis() - _lastTimeTimerSet >= _onDuration) {
         _ledMode = LED_OFF;
         _timerOn = false;
         _ledASet = false;
+        _statusMode = false;
         if (_resumePrevLEDMode) {
             _ledMode = _previousLEDMode;
         }
@@ -42,6 +42,19 @@ void LED::loop() {
             _ledASet = true;
         }
         break;
+    case LED_LOOP:
+        if (millis() - _previousMillis > _loopUnitDuration) {
+            _previousMillis = millis();
+            _nextLEDDigitalVal = _loopSequence[_curLoopSequencePos];
+            // Serial.printf("step %d\n", _loopSequence[_curLoopSequencePos]);
+            // Serial.printf("%d, %d\n", _nextLEDDigitalVal, _curLEDDigitalVal);
+            if (_curLoopSequencePos < _loopSequenceLength-1) {
+                _curLoopSequencePos++;
+            } else {
+                _curLoopSequencePos = 0;
+            }
+        }
+        break;
     default:
         _nextLEDDigitalVal = false;
     }
@@ -56,52 +69,83 @@ void LED::loop() {
 }
 
 void LED::on() {
-    pinMode(_pin, OUTPUT);
-    _ledMode = LED_ON;
+    // Serial.printf("statusMode=%d\n", _statusMode);
+    if (!_statusMode) {
+        pinMode(_pin, OUTPUT);
+        _ledMode = LED_ON;
+        if (_timerOn) {
+            _statusMode = true;
+        }
+    }
 }
 
 void LED::off() {
-    pinMode(_pin, OUTPUT);
-    _ledMode = LED_OFF;
+    if (!_statusMode) {
+        pinMode(_pin, OUTPUT);
+        _ledMode = LED_OFF;
+        if (_timerOn) {
+            _statusMode = true;
+        }
+    }
 }
 
 void LED::toggle() {
-    switch (_ledMode)
-    {
-    case LED_OFF:
-        this->on();
-        break;
-    
-    default:
-        this->off();
-        break;
+    if (!_statusMode) {
+        switch (_ledMode)
+        {
+        case LED_OFF:
+            this->on();
+            break;
+        
+        default:
+            this->off();
+            break;
+        }
+        if (_timerOn) {
+            _statusMode = true;
+        }
     }
 }
 
 void LED::set(bool state) {
-    if (state)
-        this->on();
-    else 
-        this->off();
+    if (!_statusMode) {
+        if (state)
+            this->on();
+        else 
+            this->off();
+        if (_timerOn) {
+            _statusMode = true;
+        }
+    }
 }
 
 void LED::blink(unsigned int period, double dutyCycle) {
-    pinMode(_pin, OUTPUT);
-    _ledMode = LED_BLINK;
-    if (dutyCycle > 1.0) {
-        dutyCycle = 1.0;
+    if (!_statusMode) {
+        pinMode(_pin, OUTPUT);
+        _ledMode = LED_BLINK;
+        if (dutyCycle > 1.0) {
+            dutyCycle = 1.0;
+        }
+        else if (dutyCycle < 0.0) {
+            dutyCycle = 0.0;
+        }
+        _blinkOnPeriod = period * dutyCycle;
+        _blinkOffPeriod = period * (1.0-dutyCycle);
+        if (_timerOn) {
+            _statusMode = true;
+        }
     }
-    else if (dutyCycle < 0.0) {
-        dutyCycle = 0.0;
-    }
-    _blinkOnPeriod = period * dutyCycle;
-    _blinkOffPeriod = period * (1.0-dutyCycle);
 }
 
 void LED::aSet(int aValue) {
-    _ledMode = LED_ANALOGSET;
-    _curLEDAnalogVal = aValue;
-    _ledASet = false;
+    if (!_statusMode) {
+        _ledMode = LED_ANALOGSET;
+        _curLEDAnalogVal = aValue;
+        _ledASet = false;
+        if (_timerOn) {
+            _statusMode = true;
+        }
+    }
 }
 
 void LED::startTimer(int milliseconds, bool resumePreviousMode) {
@@ -116,4 +160,18 @@ void LED::startTimer(int milliseconds, bool resumePreviousMode) {
     else {
         _timerOn = false;
     }
+}
+
+void LED::setLoopSequence(bool loopSequence[], unsigned int loopSequenceLength) {
+    _loopSequenceLength = loopSequenceLength;
+    for (int i=0;i< _loopSequenceLength;i++) {
+        _loopSequence[i] = loopSequence[i];
+    }
+}
+void LED::setLoopUnitDuration(unsigned int LoopUnitDuration) {
+    _loopUnitDuration = LoopUnitDuration;
+}
+void LED::startLoop() {
+    _ledMode = LED_LOOP;
+    _curLoopSequencePos = 0;
 }

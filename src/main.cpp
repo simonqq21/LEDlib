@@ -3,11 +3,32 @@
 
 LED led1(18);
 String cmd;
+bool loopseq[100];
 
 void setup() {
   Serial.begin(115200);
   led1.begin();
   // analogWrite(5, 100);
+}
+
+void f1(int n) {
+  led1.setLoopUnitDuration(100);
+  // 1,0,1,0,1,0,0,0,0,0,0,0
+  int i=0;
+  for (int j=0;j<3;j++) {
+    if (j<n) loopseq[i] = 1;
+    else loopseq[i] = 0; 
+    i++;
+    for (int k=0;k<3;k++)
+      loopseq[i] = 0;
+    i++;
+  }
+  for (int j=0;j<40;j++) { 
+    loopseq[i] = 0;
+    i++;
+  }
+  led1.setLoopSequence(loopseq, i);
+  led1.startLoop();
 }
 
 void loop() {
@@ -25,7 +46,7 @@ void loop() {
     }
     else if (cmd == "i") {
       // test the on timer
-      led1.startTimer(1000, true);
+      led1.startTimer(3000, true);
       led1.blink(100, 0.5);
     }
     else if (cmd == "r") {
@@ -39,6 +60,15 @@ void loop() {
     }
     else if (cmd == "u") {
       led1.set(1);
+    }
+    else if (cmd == "a") {
+      f1(1);
+    }
+    else if (cmd == "s") {
+      f1(2);
+    }
+    else if (cmd == "d") {
+      f1(3);
     }
     else {
       led1.off();

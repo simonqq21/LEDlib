@@ -6,6 +6,9 @@
 #define LED_ON 1 
 #define LED_BLINK 2 
 #define LED_ANALOGSET 3
+#define LED_LOOP 4
+
+#define MAX_SEQUENCE_LENGTH 100
 
 class LED {
     public:
@@ -19,6 +22,9 @@ class LED {
         void blink(unsigned int period, double dutyCycle);
         void aSet(int aValue);
         void startTimer(int seconds, bool persistent=false);
+        void setLoopSequence(bool loopSequence[], unsigned int loopSequenceLength);
+        void setLoopUnitDuration(unsigned int LoopUnitDuration);
+        void startLoop();
     private:
         int _pin;
         int _ledMode;
@@ -33,6 +39,11 @@ class LED {
         bool _timerOn;
         unsigned long _lastTimeTimerSet;
         unsigned long _onDuration;
-};
+        bool _statusMode = false;
+        bool _loopSequence[MAX_SEQUENCE_LENGTH];
+        unsigned int _loopSequenceLength;
+        unsigned int _curLoopSequencePos;
+        int _loopUnitDuration;
+};      
 
 #endif
